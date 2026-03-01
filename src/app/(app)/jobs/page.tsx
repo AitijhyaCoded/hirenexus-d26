@@ -2,9 +2,9 @@
 "use client"
 
 import * as React from "react"
-import { 
-  Plus, 
-  Search, 
+import {
+  Plus,
+  Search,
   MoreHorizontal,
   Filter,
   Layers,
@@ -53,18 +53,42 @@ export default function JobsPage() {
   const db = useFirestore()
   const { toast } = useToast()
   const router = useRouter()
-  
+
   const [isAddDialogOpen, setIsAddDialogOpen] = React.useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false)
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [selectedJob, setSelectedJob] = React.useState<any>(null)
   const [searchQuery, setSearchQuery] = React.useState("")
+  const [isGeneratingJob, setIsGeneratingJob] = React.useState(false)
+
+  const [newJobForm, setNewJobForm] = React.useState({
+    title: "",
+    department: "Engineering",
+    level: "Senior (7+ Yrs exp)",
+    skills: "",
+    description: "",
+    speciality: ""
+  })
+
+  // Reset form when dialog opens/closes
+  React.useEffect(() => {
+    if (!isAddDialogOpen) {
+      setNewJobForm({
+        title: "",
+        department: "Engineering",
+        level: "Senior (7+ Yrs exp)",
+        skills: "",
+        description: "",
+        speciality: ""
+      })
+    }
+  }, [isAddDialogOpen])
 
   const jobsQuery = useMemoFirebase(() => {
     if (!db || !user?.uid) return null
     // Use a simple query to avoid complex composite index requirements
     return query(
-      collection(db, "users", user.uid, "jobDescriptions"), 
+      collection(db, "users", user.uid, "jobDescriptions"),
       orderBy("createdAt", "desc")
     )
   }, [db, user?.uid])
@@ -76,11 +100,41 @@ export default function JobsPage() {
     if (!allJobs) return []
     return allJobs.filter(job => {
       const isNotArchived = job.status !== "Archived"
-      const matchesSearch = job.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                           job.department.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesSearch = job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        job.department.toLowerCase().includes(searchQuery.toLowerCase())
       return isNotArchived && matchesSearch
     })
   }, [allJobs, searchQuery])
+
+  const handleTitleBlur = async () => {
+    if (!newJobForm.title) return
+
+    setIsGeneratingJob(true)
+    try {
+      const res = await fetch('/api/generate-job', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: newJobForm.title })
+      })
+      if (!res.ok) throw new Error('Failed to generate job info')
+      const data = await res.json()
+
+      setNewJobForm(prev => ({
+        ...prev,
+        department: data.department || prev.department,
+        level: data.level || prev.level,
+        skills: data.skills ? data.skills.join(', ') : prev.skills,
+        description: data.description || prev.description
+      }))
+
+      toast({ title: "AI Generation Complete", description: "Job fields have been automatically populated." })
+    } catch (error) {
+      console.error(error)
+      toast({ variant: "destructive", title: "AI Generation Failed", description: "Could not auto-generate job fields." })
+    } finally {
+      setIsGeneratingJob(false)
+    }
+  }
 
   const handleAddJob = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -88,7 +142,7 @@ export default function JobsPage() {
 
     setIsSubmitting(true)
     const formData = new FormData(e.currentTarget)
-    
+
     try {
       await addDoc(collection(db, "users", user.uid, "jobDescriptions"), {
         title: formData.get("title") as string,
@@ -96,11 +150,12 @@ export default function JobsPage() {
         level: formData.get("level") as string,
         skills: (formData.get("skills") as string).split(",").map(s => s.trim()),
         descriptionText: formData.get("description") as string,
+        speciality: formData.get("speciality") as string,
         userId: user.uid,
         status: "Indexed",
         createdAt: serverTimestamp(),
       })
-      
+
       toast({ title: "Job Created", description: "The new position has been added." })
       setIsAddDialogOpen(false)
     } catch (error: any) {
@@ -120,7 +175,7 @@ export default function JobsPage() {
 
     setIsSubmitting(true)
     const formData = new FormData(e.currentTarget)
-    
+
     try {
       const jobRef = doc(db, "users", user.uid, "jobDescriptions", selectedJob.id)
       await updateDoc(jobRef, {
@@ -129,9 +184,10 @@ export default function JobsPage() {
         level: formData.get("level") as string,
         skills: (formData.get("skills") as string).split(",").map(s => s.trim()),
         descriptionText: formData.get("description") as string,
+        speciality: formData.get("speciality") as string,
         updatedAt: serverTimestamp(),
       })
-      
+
       toast({ title: "Job Updated", description: "Changes have been saved." })
       setIsEditDialogOpen(false)
     } catch (error) {
@@ -159,7 +215,7 @@ export default function JobsPage() {
           <h2 className="text-3xl font-bold tracking-tight font-headline">Job Descriptions</h2>
           <p className="text-muted-foreground">{activeJobs.length} active positions</p>
         </div>
-        
+
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <Button className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 font-bold">
@@ -175,13 +231,35 @@ export default function JobsPage() {
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="title">Job Title</Label>
-                  <Input id="title" name="title" placeholder="e.g. Senior Full-Stack Engineer" required className="bg-muted/20" />
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="title">Job Title</Label>
+                    {isGeneratingJob && (
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Loader2 className="h-3 w-3 animate-spin" /> Generating with AI...
+                      </span>
+                    )}
+                  </div>
+                  <Input
+                    id="title"
+                    name="title"
+                    placeholder="e.g. Senior Full-Stack Engineer"
+                    required
+                    className="bg-muted/20"
+                    value={newJobForm.title}
+                    onChange={(e) => setNewJobForm({ ...newJobForm, title: e.target.value })}
+                    onBlur={handleTitleBlur}
+                    disabled={isGeneratingJob}
+                  />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
                     <Label htmlFor="department">Department</Label>
-                    <Select name="department" defaultValue="Engineering">
+                    <Select
+                      name="department"
+                      value={newJobForm.department}
+                      onValueChange={(val) => setNewJobForm({ ...newJobForm, department: val })}
+                      disabled={isGeneratingJob}
+                    >
                       <SelectTrigger className="bg-muted/20"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="Engineering">Engineering</SelectItem>
@@ -193,23 +271,56 @@ export default function JobsPage() {
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="level">Level</Label>
-                    <Select name="level" defaultValue="Senior">
+                    <Select
+                      name="level"
+                      value={newJobForm.level}
+                      onValueChange={(val) => setNewJobForm({ ...newJobForm, level: val })}
+                      disabled={isGeneratingJob}
+                    >
                       <SelectTrigger className="bg-muted/20"><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Junior">Junior</SelectItem>
-                        <SelectItem value="Mid">Mid</SelectItem>
-                        <SelectItem value="Senior">Senior</SelectItem>
+                        <SelectItem value="Junior (0-3 Yrs exp)">Junior (0-3 Yrs exp)</SelectItem>
+                        <SelectItem value="Mid (3-7 Yrs exp)">Mid (3-7 Yrs exp)</SelectItem>
+                        <SelectItem value="Senior (7+ Yrs exp)">Senior (7+ Yrs exp)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="skills">Skills (comma separated)</Label>
-                  <Input id="skills" name="skills" placeholder="React, Node.js, TypeScript" required className="bg-muted/20" />
+                  <Input
+                    id="skills"
+                    name="skills"
+                    placeholder="React, Node.js, TypeScript"
+                    required
+                    className="bg-muted/20"
+                    value={newJobForm.skills}
+                    onChange={(e) => setNewJobForm({ ...newJobForm, skills: e.target.value })}
+                    disabled={isGeneratingJob}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="speciality">Speciality (Optional)</Label>
+                  <Input
+                    id="speciality"
+                    name="speciality"
+                    placeholder="e.g. Needs security clearance, Night shift..."
+                    className="bg-muted/20"
+                    value={newJobForm.speciality}
+                    onChange={(e) => setNewJobForm({ ...newJobForm, speciality: e.target.value })}
+                    disabled={isGeneratingJob}
+                  />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="description">Context & Goals</Label>
-                  <Textarea id="description" name="description" className="min-h-[100px] bg-muted/20" />
+                  <Textarea
+                    id="description"
+                    name="description"
+                    className="min-h-[100px] bg-muted/20"
+                    value={newJobForm.description}
+                    onChange={(e) => setNewJobForm({ ...newJobForm, description: e.target.value })}
+                    disabled={isGeneratingJob}
+                  />
                 </div>
               </div>
               <DialogFooter>
@@ -253,9 +364,9 @@ export default function JobsPage() {
                   <Select name="level" defaultValue={selectedJob?.level}>
                     <SelectTrigger className="bg-muted/20"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Junior">Junior</SelectItem>
-                      <SelectItem value="Mid">Mid</SelectItem>
-                      <SelectItem value="Senior">Senior</SelectItem>
+                      <SelectItem value="Junior (0-3 Yrs exp)">Junior (0-3 Yrs exp)</SelectItem>
+                      <SelectItem value="Mid (3-7 Yrs exp)">Mid (3-7 Yrs exp)</SelectItem>
+                      <SelectItem value="Senior (7+ Yrs exp)">Senior (7+ Yrs exp)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -263,6 +374,10 @@ export default function JobsPage() {
               <div className="grid gap-2">
                 <Label htmlFor="edit-skills">Skills</Label>
                 <Input id="edit-skills" name="skills" defaultValue={selectedJob?.skills?.join(", ")} required className="bg-muted/20" />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-speciality">Speciality (Optional)</Label>
+                <Input id="edit-speciality" name="speciality" defaultValue={selectedJob?.speciality} className="bg-muted/20" />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="edit-desc">Context & Goals</Label>
@@ -284,15 +399,15 @@ export default function JobsPage() {
           <div className="p-4 border-b border-border/40 flex flex-wrap items-center justify-between gap-4">
             <div className="relative w-full max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input 
-                placeholder="Search jobs..." 
+              <Input
+                placeholder="Search jobs..."
                 className="pl-9 bg-muted/40 border-none"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
           </div>
-          
+
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
