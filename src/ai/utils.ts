@@ -60,8 +60,8 @@ export async function executeWithFallback<TInput>(
 }
 
 export const GEMINI_MODELS = [
+    'googleai/gemini-3-flash-preview',
     'googleai/gemini-2.5-flash',
-    'googleai/gemini-1.5-pro',
     'googleai/gemini-1.5-flash'
 ];
 
