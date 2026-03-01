@@ -77,7 +77,7 @@ export function Chatbot() {
                                 <Bot className="h-4 w-4 text-primary-foreground" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-sm tracking-tight text-foreground">Support AI</h3>
+                                <h3 className="font-bold text-sm tracking-tight text-foreground">Hiru AI</h3>
                                 <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Online</p>
                             </div>
                         </div>
