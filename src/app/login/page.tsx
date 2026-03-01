@@ -3,11 +3,11 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { 
-  BrainCircuit, 
-  Mail, 
-  Lock, 
-  ArrowRight, 
+import {
+  BrainCircuit,
+  Mail,
+  Lock,
+  ArrowRight,
   Loader2,
   Github
 } from "lucide-react"
@@ -16,11 +16,11 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { useAuth } from "@/firebase"
-import { 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
-  GoogleAuthProvider, 
-  signInWithPopup 
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup
 } from "firebase/auth"
 import { useToast } from "@/hooks/use-toast"
 
@@ -29,7 +29,7 @@ export default function LoginPage() {
   const [email, setEmail] = React.useState("")
   const [password, setPassword] = React.useState("")
   const [loading, setLoading] = React.useState(false)
-  
+
   const auth = useAuth()
   const router = useRouter()
   const { toast } = useToast()
@@ -48,7 +48,7 @@ export default function LoginPage() {
       } else {
         await createUserWithEmailAndPassword(auth, email, password)
       }
-      router.push("/")
+      router.push("/dashboard")
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -65,7 +65,7 @@ export default function LoginPage() {
     const provider = new GoogleAuthProvider()
     try {
       await signInWithPopup(auth, provider)
-      router.push("/")
+      router.push("/dashboard")
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -82,7 +82,7 @@ export default function LoginPage() {
       {/* Abstract Background Gradients */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 blur-[120px] rounded-full" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent/20 blur-[120px] rounded-full" />
-      
+
       <div className="w-full max-w-md p-4 relative z-10">
         <div className="flex flex-col items-center mb-8 gap-3">
           <div className="h-14 w-14 rounded-2xl bg-primary flex items-center justify-center shadow-2xl shadow-primary/40">
@@ -98,8 +98,8 @@ export default function LoginPage() {
           <CardHeader>
             <CardTitle className="text-xl font-bold">{isLogin ? "Welcome Back" : "Create Account"}</CardTitle>
             <CardDescription>
-              {isLogin 
-                ? "Sign in to manage your AI evaluation panels." 
+              {isLogin
+                ? "Sign in to manage your AI evaluation panels."
                 : "Join HireNexus and revolutionize your hiring process."}
             </CardDescription>
           </CardHeader>
@@ -109,10 +109,10 @@ export default function LoginPage() {
                 <Label htmlFor="email">Email Address</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    id="email" 
-                    type="email" 
-                    placeholder="name@company.com" 
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="name@company.com"
                     className="pl-10 bg-muted/20 border-border/40"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -131,10 +131,10 @@ export default function LoginPage() {
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    id="password" 
-                    type="password" 
-                    placeholder="••••••••" 
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
                     className="pl-10 bg-muted/20 border-border/40"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -142,8 +142,8 @@ export default function LoginPage() {
                   />
                 </div>
               </div>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-11"
                 disabled={loading}
               >
@@ -167,8 +167,8 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="w-full border-border/60 font-bold h-11 bg-white/5"
               onClick={handleGoogleSignIn}
               disabled={loading}
@@ -197,17 +197,17 @@ export default function LoginPage() {
           <CardFooter className="flex flex-col gap-4">
             <div className="text-sm text-center text-muted-foreground font-medium">
               {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
-              <button 
-                onClick={() => setIsLogin(!isLogin)} 
+              <button
+                onClick={() => setIsLogin(!isLogin)}
                 className="text-primary font-bold hover:underline"
               >
                 {isLogin ? "Sign up" : "Sign in"}
               </button>
             </div>
-            
-            <Button 
-              variant="ghost" 
-              size="sm" 
+
+            <Button
+              variant="ghost"
+              size="sm"
               className="w-full text-[10px] uppercase tracking-widest font-black opacity-60 hover:opacity-100"
               onClick={handleDemoFill}
             >
