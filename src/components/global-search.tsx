@@ -13,27 +13,57 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 
-const mockData = [
-  { id: "cand-1", title: "Alex Rivera", type: "Candidate", category: "candidates", icon: Users },
-  { id: "cand-2", title: "Sarah Chen", type: "Candidate", category: "candidates", icon: Users },
-  { id: "job-1", title: "Senior Full-Stack Engineer", type: "Job", category: "jobs", icon: Briefcase },
-  { id: "job-2", title: "ML Engineer", type: "Job", category: "jobs", icon: Briefcase },
-  { id: "eval-1", title: "Evaluation: Alex Rivera", type: "Evaluation", category: "evaluate", icon: BrainCircuit },
-  { id: "rep-1", title: "Report: Sarah Chen", type: "Report", category: "reports", icon: FileText },
-]
+import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase"
+import { collection, query, orderBy } from "firebase/firestore"
 
 export function GlobalSearch() {
   const [open, setOpen] = React.useState(false)
-  const [query, setQuery] = React.useState("")
+  const [queryText, setQueryText] = React.useState("")
   const router = useRouter()
 
+  const { user } = useUser()
+  const db = useFirestore()
+
+  const candidatesQuery = useMemoFirebase(() => {
+    if (!db || !user?.uid) return null
+    return query(collection(db, "users", user.uid, "candidates"), orderBy("createdAt", "desc"))
+  }, [db, user?.uid])
+
+  const jobsQuery = useMemoFirebase(() => {
+    if (!db || !user?.uid) return null
+    return collection(db, "users", user.uid, "jobDescriptions")
+  }, [db, user?.uid])
+
+  const { data: candidates } = useCollection(candidatesQuery)
+  const { data: jobs } = useCollection(jobsQuery)
+
+  const searchData = React.useMemo(() => {
+    const data: any[] = []
+    if (candidates) {
+      candidates.forEach((c: any) => {
+        data.push({ id: c.id, title: c.fullName, type: "Candidate", category: "candidates", icon: Users })
+        if (c.status === "Evaluated") {
+          data.push({ id: c.id, title: `Report: ${c.fullName}`, type: "Report", category: "reports", icon: FileText })
+        } else if (c.status === "Parsed" || c.status === "In Debate") {
+          data.push({ id: c.id, title: `Evaluate: ${c.fullName}`, type: "Evaluation", category: "evaluate", icon: BrainCircuit })
+        }
+      })
+    }
+    if (jobs) {
+      jobs.forEach((j: any) => {
+        data.push({ id: j.id, title: j.title || j.roleName || "Untitled Job", type: "Job", category: "jobs", icon: Briefcase })
+      })
+    }
+    return data
+  }, [candidates, jobs])
+
   const filteredResults = React.useMemo(() => {
-    if (!query || query.length < 2) return []
-    return mockData.filter(item => 
-      item.title.toLowerCase().includes(query.toLowerCase()) ||
-      item.type.toLowerCase().includes(query.toLowerCase())
+    if (!queryText || queryText.length < 2) return []
+    return searchData.filter(item =>
+      item.title?.toLowerCase().includes(queryText.toLowerCase()) ||
+      item.type?.toLowerCase().includes(queryText.toLowerCase())
     )
-  }, [query])
+  }, [queryText, searchData])
 
   // Handle keyboard shortcuts
   React.useEffect(() => {
@@ -50,7 +80,7 @@ export function GlobalSearch() {
 
   return (
     <div className="relative w-full max-w-xl group">
-      <Popover open={open && query.length > 0} onOpenChange={setOpen}>
+      <Popover open={open && queryText.length > 0} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <div className="relative w-full">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors pointer-events-none" />
@@ -59,29 +89,29 @@ export function GlobalSearch() {
               type="text"
               placeholder="Search (⌘+K)"
               className="w-full bg-muted/30 border-border/40 rounded-xl pl-10 pr-12 py-2.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:bg-muted/50 transition-all placeholder:text-muted-foreground/60 h-11"
-              value={query}
+              value={queryText}
               onChange={(e) => {
-                setQuery(e.target.value)
+                setQueryText(e.target.value)
                 setOpen(true)
               }}
               onFocus={() => {
-                if (query.length > 0) setOpen(true)
+                if (queryText.length > 0) setOpen(true)
               }}
             />
-            {query && (
-              <Button 
-                variant="ghost" 
-                size="icon" 
+            {queryText && (
+              <Button
+                variant="ghost"
+                size="icon"
                 className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full hover:bg-muted"
                 onClick={() => {
-                  setQuery("")
+                  setQueryText("")
                   setOpen(false)
                 }}
               >
                 <X className="h-3 w-3" />
               </Button>
             )}
-            {!query && (
+            {!queryText && (
               <div className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-40 select-none pointer-events-none">
                 <kbd className="h-5 px-1.5 rounded border border-border/40 bg-muted/60 text-[10px] font-bold flex items-center justify-center">⌘</kbd>
                 <kbd className="h-5 px-1.5 rounded border border-border/40 bg-muted/60 text-[10px] font-bold flex items-center justify-center">K</kbd>
@@ -89,8 +119,8 @@ export function GlobalSearch() {
             )}
           </div>
         </PopoverTrigger>
-        <PopoverContent 
-          className="w-[var(--radix-popover-trigger-width)] p-0 border-border/40 bg-card/95 backdrop-blur-xl shadow-2xl mt-2 overflow-hidden" 
+        <PopoverContent
+          className="w-[var(--radix-popover-trigger-width)] p-0 border-border/40 bg-card/95 backdrop-blur-xl shadow-2xl mt-2 overflow-hidden"
           align="start"
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
@@ -107,7 +137,7 @@ export function GlobalSearch() {
                       onClick={() => {
                         router.push(`/${result.category}/${result.id}`)
                         setOpen(false)
-                        setQuery("")
+                        setQueryText("")
                       }}
                     >
                       <div className="flex items-center gap-3">
@@ -127,9 +157,9 @@ export function GlobalSearch() {
                   )
                 })}
               </div>
-            ) : query.length < 2 ? (
+            ) : queryText.length < 2 ? (
               <div className="p-6 text-center space-y-2">
-                 <p className="text-xs text-muted-foreground">Type at least 2 characters to start searching...</p>
+                <p className="text-xs text-muted-foreground">Type at least 2 characters to start searching...</p>
               </div>
             ) : (
               <div className="p-10 text-center space-y-4">
@@ -138,7 +168,7 @@ export function GlobalSearch() {
                 </div>
                 <div>
                   <p className="text-sm font-bold">No results found</p>
-                  <p className="text-xs text-muted-foreground mt-1">We couldn't find any results for "{query}"</p>
+                  <p className="text-xs text-muted-foreground mt-1">We couldn't find any results for "{queryText}"</p>
                 </div>
               </div>
             )}

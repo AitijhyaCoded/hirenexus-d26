@@ -35,7 +35,6 @@ const navigation = [
 
 const systemItems = [
   { name: "Settings", href: "/settings", icon: Settings },
-  { name: "Compliance", href: "/compliance", icon: ShieldCheck },
 ]
 
 export function AppSidebar() {

@@ -41,6 +41,90 @@ type CandidateState = {
     result?: any;
 }
 
+function CandidateCard({ cs }: { cs: CandidateState }) {
+    const { candidate, events, isDebating, completed, result } = cs;
+    const latestEvent = events[events.length - 1];
+    const progressPercent = events.length === 0 ? 0 : Math.min(100, (events.length / 15) * 100);
+    const scrollRef = React.useRef<HTMLDivElement>(null);
+
+    React.useEffect(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+        }
+    }, [events]);
+
+    return (
+        <Card className="border-border/40 bg-card/40 backdrop-blur-sm shadow-lg overflow-hidden flex flex-col h-[380px]">
+            <CardHeader className="bg-muted/20 pb-3 border-b border-border/40">
+                <div className="flex justify-between items-start">
+                    <div>
+                        <CardTitle className="text-lg font-bold">{candidate.fullName}</CardTitle>
+                        <p className="text-xs text-muted-foreground mt-1">{candidate.role}</p>
+                    </div>
+                    {completed ? (
+                        <Badge className={result === "HIRE" ? "bg-emerald-500/10 text-emerald-500" : result === "NO_HIRE" || result === "NO HIRE" ? "bg-destructive/10 text-destructive" : "bg-muted text-muted-foreground"}>
+                            {result === "Error" ? "FAILED" : result === "HIRE" ? "RECOMMEND HIRE" : "NO HIRE"}
+                        </Badge>
+                    ) : isDebating ? (
+                        <Badge variant="outline" className="animate-pulse border-primary/20 text-primary bg-primary/5">
+                            <BrainCircuit className="h-3 w-3 mr-1" /> Analyzing
+                        </Badge>
+                    ) : (
+                        <Badge variant="outline">Waiting</Badge>
+                    )}
+                </div>
+            </CardHeader>
+
+            <CardContent className="flex-1 p-0 relative bg-background/50">
+                {events.length === 0 && !isDebating && !completed ? (
+                    <div className="h-full flex items-center justify-center text-muted-foreground/50 text-sm">
+                        Ready to launch panel
+                    </div>
+                ) : (
+                    <ScrollArea className="h-full px-4 py-4">
+                        <div className="space-y-4">
+                            {events.map((event, i) => {
+                                const colorClass = agentColors[event.agentName] || "text-foreground"
+                                return (
+                                    <div key={i} className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+                                        <div className="flex items-center justify-between mb-1">
+                                            <span className={`text-[10px] font-bold ${colorClass}`}>{event.agentName}</span>
+                                            <span className="text-[9px] text-muted-foreground">Round {event.round}</span>
+                                        </div>
+                                        <div className={`p-2.5 rounded-lg text-xs leading-relaxed border border-border/40 ${event.eventType === 'vote' ? 'bg-primary/5 border-primary/20' : 'bg-muted/30'}`}>
+                                            {event.content}
+                                        </div>
+                                    </div>
+                                )
+                            })}
+                            <div ref={scrollRef} className="h-2" />
+                        </div>
+                    </ScrollArea>
+                )}
+            </CardContent>
+
+            {isDebating && (
+                <div className="h-1 w-full bg-muted">
+                    <div className="h-full bg-primary transition-all duration-300 ease-in-out" style={{ width: `${progressPercent}%` }} />
+                </div>
+            )}
+
+            <CardFooter className="bg-muted/10 p-4 border-t border-border/40 flex justify-between items-center">
+                <span className="text-xs font-medium text-muted-foreground">
+                    {isDebating && latestEvent ? `Round ${latestEvent.round} • ${latestEvent.agentName}` : ""}
+                </span>
+                {completed && (
+                    <Button variant="ghost" size="sm" asChild className="ml-auto font-bold text-xs h-8">
+                        <Link href={`/reports/${candidate.id}`}>
+                            View Full Report <ChevronRight className="ml-1 h-3 w-3" />
+                        </Link>
+                    </Button>
+                )}
+            </CardFooter>
+        </Card>
+    );
+}
+
 function BulkEvaluationContent() {
     const searchParams = useSearchParams()
     const router = useRouter()
@@ -224,89 +308,9 @@ function BulkEvaluationContent() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {candidateList.map((cs) => {
-                    const { candidate, events, isDebating, completed, result } = cs;
-                    const latestEvent = events[events.length - 1];
-                    const progressPercent = events.length === 0 ? 0 : Math.min(100, (events.length / 15) * 100);
-
-                    return (
-                        <Card key={candidate.id} className="border-border/40 bg-card/40 backdrop-blur-sm shadow-lg overflow-hidden flex flex-col h-[380px]">
-                            <CardHeader className="bg-muted/20 pb-3 border-b border-border/40">
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <CardTitle className="text-lg font-bold">{candidate.fullName}</CardTitle>
-                                        <p className="text-xs text-muted-foreground mt-1">{candidate.role}</p>
-                                    </div>
-                                    {completed ? (
-                                        <Badge className={result === "HIRE" ? "bg-emerald-500/10 text-emerald-500" : result === "NO_HIRE" || result === "NO HIRE" ? "bg-destructive/10 text-destructive" : "bg-muted text-muted-foreground"}>
-                                            {result === "Error" ? "FAILED" : result === "HIRE" ? "RECOMMEND HIRE" : "NO HIRE"}
-                                        </Badge>
-                                    ) : isDebating ? (
-                                        <Badge variant="outline" className="animate-pulse border-primary/20 text-primary bg-primary/5">
-                                            <BrainCircuit className="h-3 w-3 mr-1" /> Analyzing
-                                        </Badge>
-                                    ) : (
-                                        <Badge variant="outline">Waiting</Badge>
-                                    )}
-                                </div>
-                            </CardHeader>
-
-                            <CardContent className="flex-1 p-0 relative bg-background/50">
-                                {events.length === 0 && !isDebating && !completed ? (
-                                    <div className="h-full flex items-center justify-center text-muted-foreground/50 text-sm">
-                                        Ready to launch panel
-                                    </div>
-                                ) : (
-                                    <ScrollArea className="h-full px-4 py-4" ref={(node) => {
-                                        // Primitive auto-scroll logic for individual cards
-                                        if (node) {
-                                            const scrollableNode = node.querySelector('[data-radix-scroll-area-viewport]')
-                                            if (scrollableNode) {
-                                                scrollableNode.scrollTop = scrollableNode.scrollHeight
-                                            }
-                                        }
-                                    }}>
-                                        <div className="space-y-4">
-                                            {events.map((event, i) => {
-                                                const colorClass = agentColors[event.agentName] || "text-foreground"
-                                                return (
-                                                    <div key={i} className="animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                                        <div className="flex items-center justify-between mb-1">
-                                                            <span className={`text-[10px] font-bold ${colorClass}`}>{event.agentName}</span>
-                                                            <span className="text-[9px] text-muted-foreground">Round {event.round}</span>
-                                                        </div>
-                                                        <div className={`p-2.5 rounded-lg text-xs leading-relaxed border border-border/40 ${event.eventType === 'vote' ? 'bg-primary/5 border-primary/20' : 'bg-muted/30'}`}>
-                                                            {event.content}
-                                                        </div>
-                                                    </div>
-                                                )
-                                            })}
-                                        </div>
-                                    </ScrollArea>
-                                )}
-                            </CardContent>
-
-                            {isDebating && (
-                                <div className="h-1 w-full bg-muted">
-                                    <div className="h-full bg-primary transition-all duration-300 ease-in-out" style={{ width: `${progressPercent}%` }} />
-                                </div>
-                            )}
-
-                            <CardFooter className="bg-muted/10 p-4 border-t border-border/40 flex justify-between items-center">
-                                <span className="text-xs font-medium text-muted-foreground">
-                                    {isDebating && latestEvent ? `Round ${latestEvent.round} • ${latestEvent.agentName}` : ""}
-                                </span>
-                                {completed && (
-                                    <Button variant="ghost" size="sm" asChild className="ml-auto font-bold text-xs h-8">
-                                        <Link href={`/reports/${candidate.id}`}>
-                                            View Full Report <ChevronRight className="ml-1 h-3 w-3" />
-                                        </Link>
-                                    </Button>
-                                )}
-                            </CardFooter>
-                        </Card>
-                    )
-                })}
+                {candidateList.map((cs) => (
+                    <CandidateCard key={cs.id} cs={cs} />
+                ))}
             </div>
         </div>
     )

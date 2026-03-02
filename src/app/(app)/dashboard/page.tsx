@@ -112,10 +112,10 @@ export default function Dashboard() {
           <p className="text-muted-foreground mt-1">Welcome back. Here's what's happening with your hiring panel today.</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" size="sm" className="gap-2">
+          {/* <Button variant="outline" size="sm" className="gap-2">
             <Filter className="h-4 w-4" />
             Filter View
-          </Button>
+          </Button> */}
           <Button size="sm" asChild className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20 font-medium">
             <Link href="/candidates">Add Candidate</Link>
           </Button>
