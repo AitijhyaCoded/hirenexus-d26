@@ -83,7 +83,7 @@ export default function CandidateMockInterview() {
             </h3>
             <span className="text-[10px] text-muted-foreground/50 font-medium">{personas.length} Available</span>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {personas.map((p) => (
               <motion.div
@@ -92,9 +92,8 @@ export default function CandidateMockInterview() {
                 whileTap={{ scale: 0.99 }}
                 onClick={() => setSelectedPersonaId(p.id)}
               >
-                <div className={`cursor-pointer transition-all duration-300 rounded-xl border overflow-hidden ${
-                  selectedPersonaId === p.id 
-                  ? "liquid-glass-elevated border-primary/15" 
+                <div className={`cursor-pointer transition-all duration-300 rounded-xl border overflow-hidden ${selectedPersonaId === p.id
+                  ? "liquid-glass-elevated border-primary/15"
                   : "bg-white/[0.02] border-white/[0.05] hover:border-white/[0.1] hover:bg-white/[0.04]"
                   }`}
                 >
@@ -136,17 +135,16 @@ export default function CandidateMockInterview() {
                 <h3 className="text-sm font-semibold text-foreground/90">Interview Difficulty</h3>
                 <p className="text-[11px] text-muted-foreground/60">Adjusts AI follow-up strictness</p>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-1.5">
                 {toughnessLevels.map((lvl) => (
                   <button
                     key={lvl.id}
                     onClick={() => setToughness(lvl.id)}
-                    className={`h-10 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 border transition-all duration-200 ${
-                      toughness === lvl.id 
-                        ? lvl.activeClass
-                        : "bg-white/[0.02] border-white/[0.05] text-muted-foreground/50 hover:bg-white/[0.04] hover:text-muted-foreground"
-                    }`}
+                    className={`h-10 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 border transition-all duration-200 ${toughness === lvl.id
+                      ? lvl.activeClass
+                      : "bg-white/[0.02] border-white/[0.05] text-muted-foreground/50 hover:bg-white/[0.04] hover:text-muted-foreground"
+                      }`}
                   >
                     {lvl.icon}
                     {lvl.label}
@@ -159,7 +157,7 @@ export default function CandidateMockInterview() {
 
             {/* Selection Summary */}
             <AnimatePresence mode="wait">
-              <motion.div 
+              <motion.div
                 key={selectedPersonaId}
                 initial={{ opacity: 0, x: 6 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -176,14 +174,14 @@ export default function CandidateMockInterview() {
                     <span className="text-sm font-medium text-foreground/90 truncate">{selectedPersona.name}</span>
                   </div>
                 </div>
-                
+
                 <p className="text-[11px] text-muted-foreground/50 leading-relaxed border-l-2 border-white/[0.06] pl-2.5">
                   "{selectedPersona.systemInstruction.substring(0, 100)}…"
                 </p>
               </motion.div>
             </AnimatePresence>
 
-            <Button 
+            <Button
               onClick={handleStartSession}
               className="w-full bg-primary/90 hover:bg-primary text-primary-foreground font-medium h-12 text-sm gap-2.5 rounded-xl transition-all duration-300 hover:shadow-[0_0_30px_-6px_hsl(var(--primary)_/_0.4)]"
             >

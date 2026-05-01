@@ -3,12 +3,12 @@
 import * as React from "react"
 import { useState, useEffect, useRef, useMemo } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { 
-  Mic, 
-  MicOff, 
-  PhoneOff, 
-  User, 
-  Settings, 
+import {
+  Mic,
+  MicOff,
+  PhoneOff,
+  User,
+  Settings,
   BrainCircuit,
   Loader2,
   ChevronLeft
@@ -26,19 +26,19 @@ export default function MockInterviewSession() {
   const searchParams = useSearchParams()
   const personaId = searchParams.get("persona") || "tech-lead"
   const toughnessId = searchParams.get("toughness") || "medium"
-  
+
   const persona = useMemo(() => (personas as any[]).find(p => p.id === personaId) || personas[0], [personaId])
 
   const toughnessModifier = useMemo(() => {
     switch (toughnessId) {
-        case 'easy': 
-            return "BEHAVIOR: Be exceptionally patient, supportive and encouraging. If the candidate struggles, provide subtle hints or rephrase the question to be simpler. Maintain a low-pressure environment.";
-        case 'hard': 
-            return "BEHAVIOR: Be critical and skeptical. Challenge their assumptions. Ask deep follow-up questions about edge cases, performance, and trade-offs. Do not accept vague answers.";
-        case 'stress': 
-            return "BEHAVIOR: Create a high-pressure environment. Display high urgency. Frequently interrupt to ask for 'even better' solutions or alternative approaches. Simulate a disorganized or demanding stakeholder.";
-        default: 
-            return "BEHAVIOR: Maintain a balanced, professional, and standard interview pressure.";
+      case 'easy':
+        return "BEHAVIOR: Be exceptionally patient, supportive and encouraging. If the candidate struggles, provide subtle hints or rephrase the question to be simpler. Maintain a low-pressure environment.";
+      case 'hard':
+        return "BEHAVIOR: Be critical and skeptical. Challenge their assumptions. Ask deep follow-up questions about edge cases, performance, and trade-offs. Do not accept vague answers.";
+      case 'stress':
+        return "BEHAVIOR: Create a high-pressure environment. Display high urgency. Frequently interrupt to ask for 'even better' solutions or alternative approaches. Simulate a disorganized or demanding stakeholder.";
+      default:
+        return "BEHAVIOR: Maintain a balanced, professional, and standard interview pressure.";
     }
   }, [toughnessId])
 
@@ -49,7 +49,7 @@ export default function MockInterviewSession() {
   const [isMuted, setIsMuted] = useState(false)
   const [transcript, setTranscript] = useState<string[]>([])
   const [isAiSpeaking, setIsAiSpeaking] = useState(false)
-  
+
   const { startRecording, stopRecording, isRecording, playAudioChunk, stopPlayout } = useAudioStream()
   const clientRef = useRef<GeminiLiveClient | null>(null)
 
@@ -61,7 +61,7 @@ export default function MockInterviewSession() {
       // 1. Initialize Gemini Live Client
       const apiKey = process.env.NEXT_PUBLIC_GOOGLE_GENAI_API_KEY
       if (!apiKey) throw new Error("Google API Key not found.")
-      
+
       const client = new GeminiLiveClient(apiKey)
       clientRef.current = client
 
@@ -70,7 +70,7 @@ export default function MockInterviewSession() {
         setIsAiSpeaking(true)
         playAudioChunk(base64)
       }
-      
+
       client.onTextData = (text) => {
         setTranscript(prev => [...prev.slice(-3), `AI: ${text}`])
       }
@@ -83,7 +83,7 @@ export default function MockInterviewSession() {
           temperature: toughnessId === 'easy' ? 0.9 : 0.6, // Higher temperature for 'easy' (more creative/supportive), lower for 'hard' (more precise)
         }
       })
-      
+
       setIsJoined(true)
       setIsConnecting(false)
 
@@ -107,14 +107,14 @@ export default function MockInterviewSession() {
       await startRecording(
         (chunk: ArrayBuffer) => {
           if (!isMuted && client.isConnected()) {
-             const base64 = window.btoa(
-                new Uint8Array(chunk).reduce((data, byte) => data + String.fromCharCode(byte), '')
-             )
-             client.sendAudio(base64)
+            const base64 = window.btoa(
+              new Uint8Array(chunk).reduce((data, byte) => data + String.fromCharCode(byte), '')
+            )
+            client.sendAudio(base64)
           }
         }
       )
-      
+
     } catch (err: any) {
       console.error("Critical handleJoin Error:", err)
       setIsError(err.message || "WebSocket handshake failed. Check console.")
@@ -125,8 +125,8 @@ export default function MockInterviewSession() {
   // Monitor AI speaking state via audio context if possible, or just timeout
   useEffect(() => {
     if (isAiSpeaking) {
-        const timer = setTimeout(() => setIsAiSpeaking(false), 2000)
-        return () => clearTimeout(timer)
+      const timer = setTimeout(() => setIsAiSpeaking(false), 2000)
+      return () => clearTimeout(timer)
     }
   }, [isAiSpeaking])
 
@@ -151,7 +151,7 @@ export default function MockInterviewSession() {
     <div className="flex flex-col h-[calc(100vh-80px)] max-w-5xl mx-auto p-4 gap-6 relative">
       <AnimatePresence>
         {!isJoined && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -160,24 +160,24 @@ export default function MockInterviewSession() {
             <Card className="w-full max-w-md glass-panel p-8 text-center space-y-6 border-primary/20 bg-primary/5">
               <div className="flex flex-col items-center gap-4">
                 <div className="h-16 w-16 rounded-2xl bg-primary/20 flex items-center justify-center">
-                    <Mic className="h-8 w-8 text-primary" />
+                  <Mic className="h-8 w-8 text-primary" />
                 </div>
                 <div>
-                    <h2 className="text-2xl font-bold font-headline">Ready to Begin?</h2>
-                    <p className="text-muted-foreground text-sm mt-1">
-                        Please grant microphone access to start your mock interview with <strong>{persona.name}</strong>.
-                    </p>
+                  <h2 className="text-2xl font-bold font-headline">Ready to Begin?</h2>
+                  <p className="text-muted-foreground text-sm mt-1">
+                    Please grant microphone access to start your mock interview with <strong>{persona.name}</strong>.
+                  </p>
                 </div>
               </div>
 
               {isError && (
                 <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs font-medium">
-                    {isError}
+                  {isError}
                 </div>
               )}
 
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 className="w-full font-bold h-12 text-md gap-2 shadow-xl shadow-primary/20"
                 onClick={handleJoin}
                 disabled={isConnecting}
@@ -217,54 +217,54 @@ export default function MockInterviewSession() {
         <div className="lg:col-span-2 flex flex-col gap-4 h-full">
           <Card className="flex-1 glass-panel relative overflow-hidden flex flex-col items-center justify-center border-primary/10">
             <div className={`absolute inset-0 bg-gradient-to-b from-transparent to-${persona.avatarColor.split('-')[1]}-900/10`} />
-            
+
             <AnimatePresence mode="wait">
-                 <motion.div 
-                    key={persona.id}
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className="relative z-10 flex flex-col items-center gap-6"
-                 >
-                    <div className={`h-48 w-48 rounded-full ${persona.avatarColor} flex items-center justify-center border-4 border-white/10 shadow-2xl relative`}>
-                        {isAiSpeaking && (
-                            <motion.div 
-                                className="absolute inset-0 rounded-full border-4 border-primary/50"
-                                animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
-                                transition={{ repeat: Infinity, duration: 2 }}
-                            />
-                        )}
-                        <User className="h-24 w-24 text-white" />
-                    </div>
-                    <div className="text-center">
-                        <h3 className="text-2xl font-bold font-headline">{persona.name}</h3>
-                        <p className="text-primary font-medium">{persona.role}</p>
-                    </div>
-                 </motion.div>
+              <motion.div
+                key={persona.id}
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="relative z-10 flex flex-col items-center gap-6"
+              >
+                <div className={`h-48 w-48 rounded-full ${persona.avatarColor} flex items-center justify-center border-4 border-white/10 shadow-2xl relative`}>
+                  {isAiSpeaking && (
+                    <motion.div
+                      className="absolute inset-0 rounded-full border-4 border-primary/50"
+                      animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
+                      transition={{ repeat: Infinity, duration: 2 }}
+                    />
+                  )}
+                  <User className="h-24 w-24 text-white" />
+                </div>
+                <div className="text-center">
+                  <h3 className="text-2xl font-bold font-headline">{persona.name}</h3>
+                  <p className="text-primary font-medium">{persona.role}</p>
+                </div>
+              </motion.div>
             </AnimatePresence>
 
             {/* Audio Visualization - Simplified */}
             <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-end gap-1 h-12">
-                {[...Array(12)].map((_, i) => (
-                    <motion.div 
-                        key={i}
-                        className="w-1.5 bg-primary/40 rounded-full"
-                        animate={{ 
-                            height: isAiSpeaking ? [12, Math.random() * 40 + 12, 12] : 4 
-                        }}
-                        transition={{ 
-                            repeat: Infinity, 
-                            duration: 0.5, 
-                            delay: i * 0.05 
-                        }}
-                    />
-                ))}
+              {[...Array(12)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="w-1.5 bg-primary/40 rounded-full"
+                  animate={{
+                    height: isAiSpeaking ? [12, Math.random() * 40 + 12, 12] : 4
+                  }}
+                  transition={{
+                    repeat: Infinity,
+                    duration: 0.5,
+                    delay: i * 0.05
+                  }}
+                />
+              ))}
             </div>
           </Card>
 
-          {/* User Preview */}
-          <div className="h-32 flex gap-4">
-             <Card className="w-48 glass-panel flex flex-col items-center justify-center border-white/5 bg-white/5">
-                <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center relative">
+          {/* Controls Dashboard */}
+          <div className="h-32 flex gap-3">
+             <Card className="w-32 glass-panel flex flex-col items-center justify-center border-white/5 bg-white/5 shrink-0">
+                <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center relative">
                     {!isMuted && isRecording && (
                         <motion.div 
                              className="absolute -inset-1 rounded-full border border-orange-400/50"
@@ -272,72 +272,79 @@ export default function MockInterviewSession() {
                              transition={{ repeat: Infinity, duration: 1 }}
                         />
                     )}
-                    <User className="h-6 w-6 text-muted-foreground" />
+                    <User className="h-5 w-5 text-muted-foreground" />
                 </div>
-                <span className="text-xs mt-2 font-medium opacity-60">You</span>
+                <span className="text-[10px] mt-2 font-bold uppercase tracking-tight opacity-40">You</span>
              </Card>
 
-             <Card className="flex-1 glass-panel p-4 flex flex-col justify-center border-white/5 bg-white/5">
-                <div className="space-y-1">
-                    {transcript.map((line, i) => (
-                        <p key={i} className="text-xs opacity-60 truncate">{line}</p>
-                    ))}
-                    {transcript.length === 0 && (
-                        <p className="text-xs italic opacity-40">Conversation will appear here...</p>
-                    )}
-                </div>
-             </Card>
+            <div className="flex-1 flex gap-3">
+              <Button 
+                variant={isMuted ? "destructive" : "outline"} 
+                className={`flex-1 h-full rounded-2xl flex flex-col gap-2 transition-all duration-300 ${!isMuted ? 'border-primary/20 hover:bg-primary/5 bg-white/5' : ''}`}
+                onClick={toggleMute}
+              >
+                {isMuted ? <MicOff className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
+                <span className="text-[10px] font-bold uppercase tracking-wider">{isMuted ? "Unmute" : "Mute"}</span>
+              </Button>
+              <Button 
+                variant="destructive" 
+                className="flex-1 h-full rounded-2xl flex flex-col gap-2 shadow-lg shadow-destructive/20"
+                onClick={handleEndCall}
+              >
+                <PhoneOff className="h-6 w-6" />
+                <span className="text-[10px] font-bold uppercase tracking-wider">End</span>
+              </Button>
+            </div>
           </div>
         </div>
 
         {/* Sidebar Info */}
         <div className="flex flex-col gap-6">
-           <Card className="glass-panel border-white/10">
-              <CardContent className="p-6 space-y-4">
-                 <div className="flex items-center gap-2 text-primary">
-                    <BrainCircuit className="h-5 w-5" />
-                    <span className="font-bold">Interview Focus</span>
-                 </div>
-                 <p className="text-sm text-muted-foreground leading-relaxed">
-                    {persona.description}
-                 </p>
-                 <div className="pt-4 border-t border-white/5 space-y-3">
-                    <div className="flex items-center justify-between text-xs">
-                        <span className="opacity-60">Status</span>
-                        <span className="text-emerald-400 flex items-center gap-1">
-                            {isConnected ? "Connected" : "Connecting..."} 
-                            {isConnected ? <div className="h-1 w-1 rounded-full bg-emerald-400" /> : <Loader2 className="h-3 w-3 animate-spin" />}
-                        </span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs">
-                        <span className="opacity-60">Latency</span>
-                        <span className="text-emerald-400">Sub-second</span>
-                    </div>
-                 </div>
-              </CardContent>
-           </Card>
+          <Card className="glass-panel border-white/10">
+            <CardContent className="p-6 space-y-4">
+              <div className="flex items-center gap-2 text-primary">
+                <BrainCircuit className="h-5 w-5" />
+                <span className="font-bold">Interview Focus</span>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {persona.description}
+              </p>
+              <div className="pt-4 border-t border-white/5 space-y-3">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="opacity-60">Status</span>
+                  <span className="text-emerald-400 flex items-center gap-1">
+                    {isConnected ? "Connected" : "Connecting..."}
+                    {isConnected ? <div className="h-1 w-1 rounded-full bg-emerald-400" /> : <Loader2 className="h-3 w-3 animate-spin" />}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="opacity-60">Latency</span>
+                  <span className="text-emerald-400">Sub-second</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-           <div className="flex-1" />
-
-           {/* Controls */}
-           <div className="grid grid-cols-2 gap-3">
-              <Button 
-                variant={isMuted ? "destructive" : "outline"} 
-                className={`py-8 rounded-2xl flex flex-col gap-2 transition-all duration-300 ${!isMuted ? 'border-primary/20 hover:bg-primary/5' : ''}`}
-                onClick={toggleMute}
-              >
-                {isMuted ? <MicOff className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
-                <span className="text-xs font-bold uppercase tracking-wider">{isMuted ? "Unmute" : "Mute"}</span>
-              </Button>
-              <Button 
-                variant="destructive" 
-                className="py-8 rounded-2xl flex flex-col gap-2 shadow-lg shadow-destructive/20"
-                onClick={handleEndCall}
-              >
-                <PhoneOff className="h-6 w-6" />
-                <span className="text-xs font-bold uppercase tracking-wider">End</span>
-              </Button>
-           </div>
+          {/* <Card className="glass-panel border-white/10 flex-1 overflow-hidden flex flex-col">
+            <div className="p-4 border-b border-white/5 bg-white/[0.02] flex items-center justify-between shrink-0">
+              <span className="text-[10px] font-bold uppercase tracking-wider opacity-40">Live Transcript</span>
+              <Badge variant="outline" className="text-[9px] h-4 bg-primary/5 border-primary/10 px-1.5 py-0">Real-time</Badge>
+            </div>
+            <CardContent className="p-4 flex-1 overflow-y-auto space-y-3 scrollbar-hide">
+              {transcript.map((line, i) => (
+                <div key={i} className={`p-2 rounded-lg text-xs ${line.startsWith('AI:') ? 'bg-white/5 border border-white/5' : 'bg-primary/5 border border-primary/10'}`}>
+                  <span className="font-bold opacity-40 mr-2">{line.split(':')[0]}:</span>
+                  <span className="opacity-80">{line.split(':').slice(1).join(':')}</span>
+                </div>
+              ))}
+              {transcript.length === 0 && (
+                <div className="h-full flex flex-col items-center justify-center opacity-20 gap-2 py-8">
+                  <BrainCircuit className="h-6 w-6" />
+                  <p className="text-[10px] italic text-center">Conversation will appear here...</p>
+                </div>
+              )}
+            </CardContent>
+          </Card> */}
         </div>
       </div>
     </div>

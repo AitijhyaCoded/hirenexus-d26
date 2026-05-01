@@ -64,7 +64,7 @@ HireNexus uses a diverse panel of experts to evaluate the candidate from multipl
 ---
 
 ## 🎙️ 8. Real-time Mock Interview
-*   **Model**: `googleai/gemini-2.0-flash-live` (via Gemini Multimodal Live API)
+*   **Model**: `googleai/gemini-3.1-flash-live-preview` (via Gemini Multimodal Live API)
 *   **Use Case**: Sub-second latency voice-to-voice interview simulation.
 *   **Why**: 
     *   **Multimodal Native**: Directly processes audio input and generates audio output without a separate STT/TTS layer, minimizing latency.

@@ -162,7 +162,7 @@
   }
 
   .glow-primary-hover {
-    @apply hover:shadow-[0_0_60px_-15px_hsl(var(--primary)_/_0.6)] transition-shadow duration-300;
+    @apply hover:shadow-[0_0_60px_-15px_hsl(var(--primary)/0.6)] transition-shadow duration-300;
   }
 
   /* =============================================
@@ -254,6 +254,71 @@
   .liquid-glass-interactive:focus-within {
     border-color: hsl(var(--primary) / 0.4);
     box-shadow: 0 0 0 3px hsl(var(--primary) / 0.08), 0 0 24px -6px hsl(var(--primary) / 0.2);
+  }
+
+  /* Task-specific glass backgrounds */
+  .glass-indigo {
+    background: linear-gradient(135deg,
+        hsl(226 70% 65% / 0.06) 0%,
+        hsl(var(--glass-bg) / 0.02) 50%,
+        hsl(226 70% 65% / 0.04) 100%) !important;
+    border-color: hsl(226 70% 65% / 0.1) !important;
+  }
+
+  .glass-indigo:hover {
+    border-color: hsl(226 70% 65% / 0.2) !important;
+    background: linear-gradient(135deg,
+        hsl(226 70% 65% / 0.08) 0%,
+        hsl(var(--glass-bg) / 0.03) 50%,
+        hsl(226 70% 65% / 0.06) 100%) !important;
+  }
+
+  .glass-violet {
+    background: linear-gradient(135deg,
+        hsl(262 70% 65% / 0.06) 0%,
+        hsl(var(--glass-bg) / 0.02) 50%,
+        hsl(262 70% 65% / 0.04) 100%) !important;
+    border-color: hsl(262 70% 65% / 0.1) !important;
+  }
+
+  .glass-violet:hover {
+    border-color: hsl(262 70% 65% / 0.2) !important;
+    background: linear-gradient(135deg,
+        hsl(262 70% 65% / 0.08) 0%,
+        hsl(var(--glass-bg) / 0.03) 50%,
+        hsl(262 70% 65% / 0.06) 100%) !important;
+  }
+
+  .glass-sky {
+    background: linear-gradient(135deg,
+        hsl(199 70% 65% / 0.06) 0%,
+        hsl(var(--glass-bg) / 0.02) 50%,
+        hsl(199 70% 65% / 0.04) 100%) !important;
+    border-color: hsl(199 70% 65% / 0.1) !important;
+  }
+
+  .glass-sky:hover {
+    border-color: hsl(199 70% 65% / 0.2) !important;
+    background: linear-gradient(135deg,
+        hsl(199 70% 65% / 0.08) 0%,
+        hsl(var(--glass-bg) / 0.03) 50%,
+        hsl(199 70% 65% / 0.06) 100%) !important;
+  }
+
+  .glass-emerald {
+    background: linear-gradient(135deg,
+        hsl(160 70% 65% / 0.06) 0%,
+        hsl(var(--glass-bg) / 0.02) 50%,
+        hsl(160 70% 65% / 0.04) 100%) !important;
+    border-color: hsl(160 70% 65% / 0.1) !important;
+  }
+
+  .glass-emerald:hover {
+    border-color: hsl(160 70% 65% / 0.2) !important;
+    background: linear-gradient(135deg,
+        hsl(160 70% 65% / 0.08) 0%,
+        hsl(var(--glass-bg) / 0.03) 50%,
+        hsl(160 70% 65% / 0.06) 100%) !important;
   }
 
   /* Candidate gradient text */

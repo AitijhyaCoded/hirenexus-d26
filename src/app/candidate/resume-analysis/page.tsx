@@ -180,6 +180,11 @@ The candidate wants to be evaluated for the above position.`
             const docRef = doc(db, "users", user.uid)
             await updateDoc(docRef, { 
               analysisHistory: updatedHistory,
+              lastAnalysis: {
+                ...pendingAnalysisEntry.analysisData,
+                targetRole: pendingAnalysisEntry.targetRole,
+                timestamp: pendingAnalysisEntry.timestamp
+              },
               targetRole: localTargetRole 
             })
           } catch (error) {
