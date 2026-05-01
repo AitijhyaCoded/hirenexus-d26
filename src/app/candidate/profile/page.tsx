@@ -183,7 +183,7 @@ export default function CandidateProfile() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Main form */}
         <motion.div variants={itemVariants} className="md:col-span-2">
-          <div className="liquid-glass rounded-xl overflow-hidden">
+          <div className="liquid-glass glass-indigo rounded-xl overflow-hidden">
             <div className="p-5 border-b border-white/[0.04]">
               <h3 className="text-sm font-semibold text-foreground/90 flex items-center gap-2">
                 <User className="h-4 w-4 text-muted-foreground" /> Basic Information
@@ -236,7 +236,7 @@ export default function CandidateProfile() {
 
         {/* Resume sidebar */}
         <motion.div variants={itemVariants} id="upload-resume">
-          <div className="liquid-glass rounded-xl overflow-hidden">
+          <div className="liquid-glass glass-emerald rounded-xl overflow-hidden">
             <div className="p-5 border-b border-white/[0.04]">
               <h3 className="text-sm font-semibold text-foreground/90 flex items-center gap-2">
                 <FileText className="h-4 w-4 text-muted-foreground" /> Resume

@@ -18,11 +18,11 @@ export class GeminiLiveClient {
       try {
         this.ws = new WebSocket(this.url);
         this.ws.binaryType = "arraybuffer";
-        
+
         const timeout = setTimeout(() => {
           if (this.ws?.readyState !== WebSocket.OPEN) {
-              this.ws?.close();
-              reject(new Error("Connection timed out (10s). Verify API Key or model access."));
+            this.ws?.close();
+            reject(new Error("Connection timed out (10s). Verify API Key or model access."));
           }
         }, 10000);
 
@@ -51,10 +51,10 @@ export class GeminiLiveClient {
         this.ws.onmessage = async (event) => {
           let data = event.data;
           if (data instanceof ArrayBuffer || data instanceof Blob) {
-              const text = await new Response(data).text();
-              this.handleMessage(text);
+            const text = await new Response(data).text();
+            this.handleMessage(text);
           } else {
-              this.handleMessage(data);
+            this.handleMessage(data);
           }
         };
 
@@ -70,11 +70,11 @@ export class GeminiLiveClient {
       setup: {
         model: "models/gemini-3.1-flash-live-preview",
         generation_config: {
-            ...config.generationConfig,
-            response_modalities: ["audio"]
+          ...config.generationConfig,
+          response_modalities: ["audio"]
         },
         system_instruction: {
-            parts: [{ text: config.systemInstruction || "" }]
+          parts: [{ text: config.systemInstruction || "" }]
         }
       },
     };
@@ -110,20 +110,20 @@ export class GeminiLiveClient {
   }
 
   sendToolResponse(toolResponses: any) {
-     if (this.ws?.readyState === WebSocket.OPEN) {
-        this.ws.send(JSON.stringify({
-            tool_response: {
-                function_responses: toolResponses
-            }
-        }));
-     }
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({
+        tool_response: {
+          function_responses: toolResponses
+        }
+      }));
+    }
   }
 
   private handleMessage(data: string) {
     console.log("Gemini Live Raw Message:", data.length > 500 ? data.substring(0, 500) + "..." : data);
     try {
       const parsed = JSON.parse(data);
-      
+
       const error = parsed.error;
       if (error) {
         console.error("Gemini Live Server Error Event:", error);
@@ -149,12 +149,12 @@ export class GeminiLiveClient {
               this.onTextData?.(part.text);
             }
             if (part.call) {
-                this.onToolCall?.(part.call);
+              this.onToolCall?.(part.call);
             }
           });
         }
         if (serverContent.interrupted) {
-            this.onInterrupted?.();
+          this.onInterrupted?.();
         }
       }
     } catch (e) {

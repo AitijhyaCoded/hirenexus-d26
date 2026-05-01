@@ -68,6 +68,7 @@ export default function CandidateDashboard() {
   const hasResume = profileData?.hasResume || false;
   const hasAnalysis = !!profileData?.lastAnalysis;
   const consensusScore = profileData?.lastAnalysis?.consensus?.overallScore;
+  const targetRole = profileData?.lastAnalysis?.targetRole || profileData?.targetRole || "Target Role";
 
   const metrics = [
     {
@@ -75,16 +76,18 @@ export default function CandidateDashboard() {
       value: hasAnalysis ? "100%" : hasResume ? "80%" : "60%",
       change: hasAnalysis ? "Ready for jobs" : "Upload resume to improve",
       icon: FileText,
-      color: "text-emerald-400",
-      bgColor: "bg-emerald-500/10",
+      color: "text-indigo-400",
+      bgColor: "bg-indigo-500/10",
+      glassClass: "glass-indigo"
     },
     {
       title: "Consensus Score",
       value: consensusScore ? `${consensusScore}/100` : "—",
-      change: hasAnalysis ? "From 5 AI Agents" : "Run analysis to view",
+      change: hasAnalysis ? `${targetRole}` : "Run analysis to view",
       icon: TrendingUp,
-      color: "text-primary",
-      bgColor: "bg-primary/10",
+      color: "text-violet-400",
+      bgColor: "bg-violet-500/10",
+      glassClass: "glass-violet"
     },
     {
       title: "Mock Interviews",
@@ -93,6 +96,7 @@ export default function CandidateDashboard() {
       icon: Video,
       color: "text-sky-400",
       bgColor: "bg-sky-400/10",
+      glassClass: "glass-sky"
     },
   ]
 
@@ -131,7 +135,7 @@ export default function CandidateDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {metrics.map((metric, i) => (
           <motion.div key={metric.title} variants={itemVariants}>
-            <div className="liquid-glass rounded-xl p-5 group cursor-default">
+            <div className={`liquid-glass rounded-xl p-5 group cursor-default ${metric.glassClass}`}>
               <div className="flex items-center justify-between mb-4">
                 <div className={`p-2 rounded-lg ${metric.bgColor}`}>
                   <metric.icon className={`h-4 w-4 ${metric.color}`} />
@@ -153,7 +157,7 @@ export default function CandidateDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Action Items */}
         <motion.div variants={itemVariants} className="lg:col-span-2">
-          <div className="liquid-glass rounded-xl overflow-hidden">
+          <div className="liquid-glass glass-emerald rounded-xl overflow-hidden">
             <div className="px-5 pt-5 pb-3">
               <h3 className="text-sm font-semibold text-foreground/90">Action Items</h3>
               <p className="text-xs text-muted-foreground mt-0.5">Tasks to improve your hiring chances.</p>
@@ -170,7 +174,11 @@ export default function CandidateDashboard() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400/80 border border-amber-500/10">Pending</span>
+                  {hasResume ? (
+                    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400/80 border border-emerald-500/10">Completed</span>
+                  ) : (
+                    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400/80 border border-amber-500/10">Pending</span>
+                  )}
                   <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/30 group-hover/item:text-muted-foreground/60 group-hover/item:translate-x-0.5 transition-all duration-200" />
                 </div>
               </Link>
@@ -186,7 +194,7 @@ export default function CandidateDashboard() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary/80 border border-primary/10">Recommended</span>
+                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400/80 border border-sky-500/10">Recommended</span>
                   <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/30 group-hover/item:text-muted-foreground/60 group-hover/item:translate-x-0.5 transition-all duration-200" />
                 </div>
               </Link>
@@ -202,7 +210,11 @@ export default function CandidateDashboard() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-violet-400/10 text-violet-400/80 border border-violet-400/10">New</span>
+                  {hasAnalysis ? (
+                    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-400/80 border border-violet-500/10">Completed</span>
+                  ) : (
+                    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-violet-400/10 text-violet-400/80 border border-violet-400/10">New</span>
+                  )}
                   <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/30 group-hover/item:text-muted-foreground/60 group-hover/item:translate-x-0.5 transition-all duration-200" />
                 </div>
               </Link>
@@ -212,20 +224,20 @@ export default function CandidateDashboard() {
 
         {/* Status Timeline */}
         <motion.div variants={itemVariants}>
-          <div className="liquid-glass rounded-xl p-5 h-full">
+          <div className="liquid-glass glass-indigo rounded-xl p-5 h-full">
             <h3 className="text-sm font-semibold text-foreground/90">Your Status</h3>
             <p className="text-xs text-muted-foreground mt-0.5 mb-6">Pipeline readiness</p>
             <div className="space-y-5">
               {[
-                { label: "Profile Created", done: true },
-                { label: "Resume Uploaded", done: hasResume },
-                { label: "AI Screening", done: hasAnalysis },
+                { label: "Profile Created", done: true, color: "text-blue-400", bgColor: "bg-blue-500/15" },
+                { label: "Resume Uploaded", done: hasResume, color: "text-emerald-400", bgColor: "bg-emerald-500/15" },
+                { label: "AI Screening", done: hasAnalysis, color: "text-violet-400", bgColor: "bg-violet-500/15" },
               ].map((act, i) => (
                 <div key={i} className="flex gap-3.5 items-start relative pb-0 last:pb-0">
                   {i !== 2 && <div className="absolute left-[9px] top-[24px] bottom-[-20px] w-px bg-white/[0.06]" />}
-                  <div className={`h-[18px] w-[18px] rounded-full shrink-0 z-10 flex items-center justify-center mt-0.5 ${act.done ? 'bg-emerald-500/15 ring-1 ring-emerald-500/20' : 'bg-white/[0.04] ring-1 ring-white/[0.08]'}`}>
+                  <div className={`h-[18px] w-[18px] rounded-full shrink-0 z-10 flex items-center justify-center mt-0.5 ${act.done ? `${act.bgColor} ring-1 ring-white/10` : 'bg-white/[0.04] ring-1 ring-white/[0.08]'}`}>
                     {act.done ? (
-                      <CheckCircle2 className="h-2.5 w-2.5 text-emerald-400" />
+                      <CheckCircle2 className={`h-2.5 w-2.5 ${act.color}`} />
                     ) : (
                       <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/30" />
                     )}
@@ -234,7 +246,7 @@ export default function CandidateDashboard() {
                     <p className={`text-[13px] font-medium ${act.done ? 'text-foreground/85' : 'text-muted-foreground/60'}`}>
                       {act.label}
                     </p>
-                    {act.done && <span className="text-[10px] text-emerald-400/60">Completed</span>}
+                    {act.done && <span className={`text-[10px] ${act.color}/60 opacity-80`}>Completed</span>}
                   </div>
                 </div>
               ))}

@@ -244,7 +244,7 @@ export default function CandidateGithubDashboard() {
           
           {/* Stats Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <motion.div variants={itemVariants} className="liquid-glass rounded-xl p-5">
+            <motion.div variants={itemVariants} className="liquid-glass glass-emerald rounded-xl p-5">
               <div className="flex justify-between items-center">
                 <div className="p-2 bg-emerald-500/10 rounded-lg"><Code2 className="h-4 w-4 text-emerald-400" /></div>
               </div>
@@ -253,7 +253,7 @@ export default function CandidateGithubDashboard() {
                 <p className="text-xs text-muted-foreground mt-0.5">Repositories Analyzed</p>
               </div>
             </motion.div>
-            <motion.div variants={itemVariants} className="liquid-glass rounded-xl p-5">
+            <motion.div variants={itemVariants} className="liquid-glass glass-sky rounded-xl p-5">
               <div className="flex justify-between items-center">
                 <div className="p-2 bg-sky-500/10 rounded-lg"><GitCommit className="h-4 w-4 text-sky-400" /></div>
               </div>
@@ -262,7 +262,7 @@ export default function CandidateGithubDashboard() {
                 <p className="text-xs text-muted-foreground mt-0.5">Yearly Contributions</p>
               </div>
             </motion.div>
-            <motion.div variants={itemVariants} className="liquid-glass rounded-xl p-5 md:col-span-2">
+            <motion.div variants={itemVariants} className="liquid-glass glass-violet rounded-xl p-5 md:col-span-2">
               <div className="flex items-start gap-3">
                 <div className="p-2 bg-primary/10 rounded-lg shrink-0 mt-0.5"><Sparkles className="h-4 w-4 text-primary" /></div>
                 <div>
@@ -275,7 +275,7 @@ export default function CandidateGithubDashboard() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
             {/* Tech Breadth */}
-            <motion.div variants={itemVariants} className="liquid-glass rounded-xl lg:col-span-2 overflow-hidden">
+            <motion.div variants={itemVariants} className="liquid-glass glass-indigo rounded-xl lg:col-span-2 overflow-hidden">
               <div className="p-5 border-b border-white/[0.04]">
                 <h3 className="text-sm font-semibold text-foreground/90">Technology Imprint</h3>
                 <p className="text-[11px] text-muted-foreground mt-0.5">Dominant languages across all repositories.</p>
@@ -294,7 +294,7 @@ export default function CandidateGithubDashboard() {
             </motion.div>
 
             {/* Complexity Radar */}
-            <motion.div variants={itemVariants} className="liquid-glass rounded-xl overflow-hidden">
+            <motion.div variants={itemVariants} className="liquid-glass glass-sky rounded-xl overflow-hidden">
               <div className="p-5 border-b border-white/[0.04]">
                 <h3 className="text-sm font-semibold text-foreground/90">Engineering Depth</h3>
                 <p className="text-[11px] text-muted-foreground mt-0.5">Structural competency evaluation.</p>
@@ -314,7 +314,7 @@ export default function CandidateGithubDashboard() {
           </div>
 
           {/* Contribution Velocity */}
-          <motion.div variants={itemVariants} className="liquid-glass rounded-xl overflow-hidden">
+          <motion.div variants={itemVariants} className="liquid-glass glass-emerald rounded-xl overflow-hidden">
             <div className="p-5 border-b border-white/[0.04]">
               <h3 className="text-sm font-semibold text-foreground/90">Contribution Velocity</h3>
               <p className="text-[11px] text-muted-foreground mt-0.5">Monthly commit volume over the last 12 months.</p>
@@ -341,7 +341,9 @@ export default function CandidateGithubDashboard() {
           {/* Top Repos */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {analysisData.data.topRepositories.map((repo: any, i: number) => (
-              <motion.div key={i} variants={itemVariants} className="liquid-glass rounded-xl p-5 space-y-3 hover:border-primary/15 transition-all duration-300">
+              <motion.div key={i} variants={itemVariants} className={`liquid-glass rounded-xl p-5 space-y-3 hover:border-primary/15 transition-all duration-300 ${
+                i % 3 === 0 ? "glass-sky" : i % 3 === 1 ? "glass-indigo" : "glass-violet"
+              }`}>
                 <div className="flex items-center gap-2">
                   <Github className="h-4 w-4 text-muted-foreground/50" />
                   <h4 className="font-semibold text-sm text-foreground/90">{repo.name}</h4>
@@ -373,7 +375,7 @@ export default function CandidateGithubDashboard() {
             </div>
 
             {/* Role Selector */}
-            <motion.div variants={itemVariants} className="liquid-glass-elevated rounded-xl p-5">
+            <motion.div variants={itemVariants} className="liquid-glass-elevated glass-indigo rounded-xl p-5">
               <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-3">Customize Roadmap Target Role</p>
               <div className="flex flex-col sm:flex-row gap-3 items-end">
                 <div className="space-y-1.5 flex-grow">
@@ -441,7 +443,9 @@ export default function CandidateGithubDashboard() {
             {!isRegeneratingProjects && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-8">
                 {(customProjectRecs || analysisData.data.projectRecommendations)?.map((rec: any, idx: number) => (
-                  <motion.div key={`${activeRoadmapRole}-${idx}`} variants={itemVariants} initial="hidden" animate="visible" className="liquid-glass rounded-xl overflow-hidden group hover:border-primary/15 transition-all duration-300">
+                  <motion.div key={`${activeRoadmapRole}-${idx}`} variants={itemVariants} initial="hidden" animate="visible" className={`liquid-glass rounded-xl overflow-hidden group hover:border-primary/15 transition-all duration-300 ${
+                    idx % 2 === 0 ? "glass-violet" : "glass-sky"
+                  }`}>
                     <div className="p-6 space-y-4">
                       <div className="flex justify-between items-start gap-3">
                         <div className="space-y-1">
